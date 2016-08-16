@@ -132,9 +132,9 @@ TIMING_OFFSET_FUNC(6,22,16)
 int (*fine_timing_offset)(int coarse, int fine) = NULL;
 
 int lte_radio_iface_init(double freq, int chans, double gain,
-			 int rbs, int ext, const std::string &args)
+			 int rbs, int ref, const std::string &args)
 {
-	dev = uhd_init(&subframe0_ts, freq, args, rbs, chans, gain, ext);
+	dev = uhd_init(&subframe0_ts, freq, args, rbs, chans, gain, ref);
 	if (!dev) {
 		fprintf(stderr, "UHD failed to init\n");
 		return -1;

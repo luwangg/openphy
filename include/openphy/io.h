@@ -4,12 +4,18 @@
 #include <stdint.h>
 #include <vector>
 
+enum dev_ref_type {
+	REF_INTERNAL,
+	REF_EXTERNAL,
+	REF_GPSDO,
+};
+
 struct lte_dbuf;
 
 void lte_radio_iface_reset();
 
 int lte_radio_iface_init(double freq, int chans, double gain,
-			 int rbs, int ext, const std::string &args);
+			 int rbs, int ref, const std::string &args);
 
 int lte_read_subframe_burst(std::vector<short *> buf,
 			    int num, int coarse, int fine);

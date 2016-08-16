@@ -56,9 +56,19 @@ USRP Hardware Driver for Ettus radio device support
 
   http://uhd.ettus.com
 
+
 Wireshark for LTE MAC/RRC dissection
 
   http://www.wireshark.org
+
+Reference Clock
+===============
+
+OpenPHY will resolve the RF frequency offsets between the local device and the
+remote eNodeB within a range of approximately +/-2.5 kHz.
+
+*Use of GPSDO module or external frequency reference is recommended for RF
+frequencies above 1 GHz.*
 
 Wireshark
 =========

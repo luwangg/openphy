@@ -21,8 +21,9 @@
 #include <vector>
 #include <thread>
 #include <cstdio>
+#include <string>
 #include <math.h>
-#include <string.h>
+//#include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <unistd.h>
@@ -95,7 +96,7 @@ struct lte_config {
 	int rbs;
 	int threads;
 	uint16_t rnti;
-	bool extref;
+	enum dev_ref_type ref;
 };
 
 static void print_help()
@@ -109,18 +110,35 @@ static void print_help()
 		"  -j    Number of PDSCH decoding threads (default = 1)\n"
 		"  -b    Number of LTE resource blocks (default = auto)\n"
 		"  -r    LTE RNTI (default = 0xFFFF)\n"
-		"  -x    Enable external device reference (default = off)\n\n");
+		"  -x    Enable external device reference (default = off)\n"
+		"  -p    Enable GPSDO reference (default = off)\n\n");
 }
 
 static void print_config(struct lte_config *config)
 {
+	std::string refstr;
+
+	switch (config->ref) {
+	case REF_INTERNAL:
+		refstr = "Internal";
+		break;
+	case REF_EXTERNAL:
+		refstr = "External";
+		break;
+	case REF_GPSDO:
+		refstr = "GPSDO";
+		break;
+	default:
+		refstr = "Unknown";
+	}
+
 	fprintf(stdout,
 		"Config:\n"
 		"    Device args.............. \"%s\"\n"
 		"    Downlink frequency....... %.3f MHz\n"
 		"    Receive gain............. %.2f dB\n"
 		"    Receive antennas......... %i\n"
-		"    External reference....... %s\n"
+		"    Clock reference.......... %s\n"
 		"    PDSCH decoding threads... %i\n"
 		"    LTE resource blocks...... %i\n"
 		"    LTE RNTI................. 0x%04x\n"
@@ -129,7 +147,7 @@ static void print_config(struct lte_config *config)
 		config->freq / 1e6,
 		config->gain,
 		config->chans,
-		config->extref ? "On" : "Off",
+		refstr.c_str(),
 		config->threads,
 		config->rbs,
 		config->rnti);
@@ -160,9 +178,9 @@ static int handle_options(int argc, char **argv, struct lte_config *config)
 	config->rbs = 0;
 	config->threads = 1;
 	config->rnti = 0xffff;
-	config->extref = false;
+	config->ref = REF_INTERNAL;
 
-	while ((option = getopt(argc, argv, "ha:c:f:g:j:b:r:x")) != -1) {
+	while ((option = getopt(argc, argv, "ha:c:f:g:j:b:r:xp")) != -1) {
 		switch (option) {
 		case 'h':
 			print_help();
@@ -193,7 +211,10 @@ static int handle_options(int argc, char **argv, struct lte_config *config)
 			config->rnti = atoi(optarg);
 			break;
 		case 'x':
-			config->extref = true;
+			config->ref = REF_EXTERNAL;
+			break;
+		case 'p':
+			config->ref = REF_GPSDO;
 			break;
 		default:
 			print_help();
@@ -247,7 +268,7 @@ int main(int argc, char **argv)
 
 	if (!config.rbs) {
 		if (lte_radio_iface_init(config.freq, config.chans,
-					 config.gain, 6, config.extref,
+					 config.gain, 6, config.ref,
 					 config.args) < 0) {
 			fprintf(stderr, "Radio: Failed to initialize\n");
 			return -1;
@@ -259,7 +280,7 @@ int main(int argc, char **argv)
 
 	if (lte_radio_iface_init(config.freq, config.chans,
 				 config.gain, config.rbs,
-				 config.extref, config.args) < 0) {
+				 config.ref, config.args) < 0) {
 		fprintf(stderr, "Radio: Failed to initialize\n");
 		return -1;
 	}

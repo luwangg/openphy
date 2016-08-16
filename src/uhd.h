@@ -11,7 +11,7 @@ void uhd_go(struct uhd_dev *dev);
 void uhd_stop_rx(struct uhd_dev *dev);
 
 struct uhd_dev *uhd_init(int64_t *ts, double freq, const std::string &args,
-			 size_t rbs, size_t chans, double gain, bool ext);
+			 size_t rbs, size_t chans, double gain, int ref);
 int uhd_pull(struct uhd_dev *dev,
 	     std::vector<short *> &buf,
 	     size_t len, int64_t ts);

@@ -24,6 +24,7 @@
 
 #include <uhd/usrp/multi_usrp.hpp>
 #include <uhd/utils/thread_priority.hpp>
+#include "openphy/io.h"
 #include "uhd.h"
 #include "buffer.h"
 #include "log.h"
@@ -248,7 +249,7 @@ static std::string get_dev_args(int type)
 }
 
 struct uhd_dev *uhd_init(int64_t *ts, double freq, const std::string &args,
-			 size_t rbs, size_t chans, double gain, bool ext)
+			 size_t rbs, size_t chans, double gain, int ref)
 {
 	struct uhd_dev *dev = new struct uhd_dev();
 
@@ -284,8 +285,17 @@ struct uhd_dev *uhd_init(int64_t *ts, double freq, const std::string &args,
 
         uhd::set_thread_priority_safe();
 
-	if (ext)
+	switch (ref) {
+	case REF_EXTERNAL:
 		dev->dev->set_clock_source("external");
+		break;
+	case REF_GPSDO:
+		dev->dev->set_clock_source("gpsdo");
+		break;
+	case REF_INTERNAL:
+	default:
+		break;
+	}
 
 	if (!uhd_init_rates(dev, rbs) || !uhd_init_freq(dev, freq))
 		return NULL;
