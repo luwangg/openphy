@@ -160,6 +160,15 @@ static int reserved_rb(int rbs, int rb, int slot, int l, int subframe)
 		start = 22;
 		end = 27;
 		break;
+	case 75:
+		if (rb == 34)
+			return 2;
+		if (rb == 40)
+			return 3;
+
+		start = 35;
+		end = 39;
+		break;
 	case 100:
 		start = 47;
 		end = 52;
